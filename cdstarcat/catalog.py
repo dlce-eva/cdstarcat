@@ -220,7 +220,7 @@ class Catalog(WithHumanReadableSize):
 
     def _create(self, path, metadata):
         mimetype = mimetypes.guess_type(path.as_posix(), strict=False)[0] \
-                   or 'application/octet-stream'
+            or 'application/octet-stream'
         maintype, subtype = mimetype.split('/')
         cls = getattr(media, maintype.capitalize(), media.File)
         file_ = cls(path.as_posix())

@@ -19,7 +19,7 @@ class Tests(WithTempCatalog):
     def test_context_manager(self):
         jsonlib.dump({}, self.catalog_path)
         mtime = self.catalog_path.stat().st_mtime
-        with Catalog(self.catalog_path) as c:
+        with Catalog(self.catalog_path):
             time.sleep(0.1)
         self.assertGreater(self.catalog_path.stat().st_mtime, mtime)
 
@@ -49,10 +49,10 @@ class Tests(WithTempCatalog):
 
     def test_checks(self):
         c = Catalog(self.catalog_path)
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(ValueError):
             c['objid'] = 1
 
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(ValueError):
             c['12345-1234-1234-1234-1'] = 1
 
     def test_empty(self):
