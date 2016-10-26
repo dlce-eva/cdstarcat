@@ -9,7 +9,7 @@ def read(fname):
 
 setup(
     name='cdstarcat',
-    version="0.1.0",
+    version="0.2.0",
     description='Manage objects in a CDSTAR instance through a catalog',
     long_description=read("README.md"),
     author='Robert Forkel',
