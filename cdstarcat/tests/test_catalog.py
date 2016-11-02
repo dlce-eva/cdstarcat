@@ -5,6 +5,7 @@ from collections import OrderedDict
 import datetime
 
 from clldutils import jsonlib
+from clldutils.path import path_component
 from mock import patch
 
 from cdstarcat.catalog import Catalog, Object, filter_hidden
@@ -13,7 +14,7 @@ from cdstarcat.tests.util import PATH, OBJID, CdstarObject, MockApi, WithTempCat
 
 class Tests(WithTempCatalog):
     def test_misc(self):
-        self.assertFalse(filter_hidden(self.tmp_path('.hidden')))
+        self.assertFalse(filter_hidden(self.tmp_path(path_component('.hiddenä'))))
         self.assertTrue(filter_hidden(self.tmp_path('not_hidden')))
 
     def test_context_manager(self):

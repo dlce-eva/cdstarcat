@@ -13,7 +13,7 @@ import attr
 
 from pycdstar import media
 from pycdstar.api import Cdstar
-from clldutils.path import Path, walk
+from clldutils.path import Path, walk, as_unicode
 from clldutils.jsonlib import dump, load
 from clldutils.misc import format_size
 
@@ -97,7 +97,7 @@ class Object(WithHumanReadableSize):
 
 
 def filter_hidden(fname):
-    return not fname.stem.startswith('.')
+    return not as_unicode(fname.stem).startswith('.')
 
 
 class Catalog(WithHumanReadableSize):
@@ -223,7 +223,7 @@ class Catalog(WithHumanReadableSize):
             or 'application/octet-stream'
         maintype, subtype = mimetype.split('/')
         cls = getattr(media, maintype.capitalize(), media.File)
-        file_ = cls(path.as_posix())
+        file_ = cls(as_unicode(path.as_posix()))
         if file_.md5 not in self.md5_to_object:
             obj, md, bitstreams = file_.create_object(self.api, metadata)
             return True, self.add(obj, metadata=md)

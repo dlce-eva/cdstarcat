@@ -16,7 +16,7 @@ setup(
     author_email='forkel@shh.mpg.de',
     url='https://github.com/clld/cdstarcat',
     install_requires=[
-        'clldutils>=1.4.1',
+        'clldutils>=1.5.1',
         'pycdstar>=0.3',
         'attrs',
     ],
