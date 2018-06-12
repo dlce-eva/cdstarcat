@@ -16,7 +16,7 @@ import os
 from clldutils.clilib import ArgumentParser
 from clldutils.markup import Table
 
-from cdstarcat.catalog import Catalog, OBJID_PATTERN
+from cdstarcat import Catalog, OBJID_PATTERN
 
 
 def cleanup(args):
@@ -99,3 +99,7 @@ def main():  # pragma: no cover
             help="defaults to ${0}".format(envvar),
             default=os.environ.get(envvar))
     sys.exit(parser.main())
+
+
+if __name__ == "__main__":
+    main()

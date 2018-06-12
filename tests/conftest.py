@@ -1,21 +1,25 @@
 # coding: utf8
 from __future__ import unicode_literals, print_function, division
 
+import py
+import pytest
 from mock import Mock
+from clldutils.path import Path
+
 from pycdstar.media import File
-from clldutils.path import Path, copy
-from clldutils.testing import WithTempDir
 
 
-OBJID = "EAEA0-0005-07E0-246C-0"
-PATH = Path(__file__).parent.joinpath('fixtures', 'catalog.json')
+
+@pytest.fixture
+def catalog_path():
+    return Path(__file__).parent / 'fixtures' / 'catalog.json'
 
 
-class WithTempCatalog(WithTempDir):
-    def setUp(self):
-        WithTempDir.setUp(self)
-        self.catalog_path = self.tmp_path('cat.json')
-        copy(PATH, self.catalog_path)
+@pytest.fixture
+def tmp_catalog_path(tmpdir):
+    catalog_path = tmpdir.join('cat.json')
+    py.path.local(__file__).dirpath('fixtures', 'catalog.json').copy(catalog_path)
+    return catalog_path
 
 
 class CdstarObject(object):
@@ -47,23 +51,7 @@ class CdstarObject(object):
             'last-modified': 7}))
 
 
-class MockApi(object):
-    def __init__(self, obj=None, side_effect=None):
-        self.obj = obj
-        self.side_effect = side_effect
-        self.search_called = 0
 
-    def __call__(self, *args, **kw):
-        return self
-
-    def get_object(self, *args):
-        if self.obj:
-            return self.obj
-        if self.side_effect:
-            raise self.side_effect()
-
-    def search(self, *args, **kw):
-        self.search_called += 1
-        if self.search_called < 2:
-            return [Mock(resource=CdstarObject())]
-        return []
+@pytest.fixture
+def cdstar_object():
+    return CdstarObject

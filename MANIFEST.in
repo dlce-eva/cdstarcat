@@ -1,2 +1,3 @@
-include *.rst *.md LICENSE
-recursive-include fixtures *.json
+include README.md
+graft src
+global-exclude *.py[co]

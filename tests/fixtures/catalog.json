@@ -1,0 +1,41 @@
+{
+    "EAEA0-0005-07E0-246C-0": {
+        "bitstreams": [
+            {
+                "bitstreamid": "full.jpg",
+                "checksum": "49fef1d6a6df8e1342efd2e49f12f78f",
+                "created": 1452620826295,
+                "checksum-algorithm": "MD5",
+                "last-modified": 1452620826307,
+                "filesize": 90929,
+                "content-type": "image/jpeg"
+            },
+            {
+                "bitstreamid": "thumbnail.jpg",
+                "checksum": "b2b99c7e3746e5142c5fecaa726578b8",
+                "created": 1452620827131,
+                "checksum-algorithm": "MD5",
+                "last-modified": 1452620827140,
+                "filesize": 3274,
+                "content-type": "image/jpeg"
+            },
+            {
+                "bitstreamid": "web.jpg",
+                "checksum": "4eb38bddba86f8c7d822a82517cd8825",
+                "created": 1452620826764,
+                "checksum-algorithm": "MD5",
+                "last-modified": 1452620826774,
+                "filesize": 18226,
+                "content-type": "image/jpeg"
+            }
+        ],
+        "metadata": {
+            "collection": "tsammalex",
+            "creator": "unknown (JP)",
+            "license": "see http://tsammalex.clld.org/images/49fef1d6a6df8e1342efd2e49f12f78f",
+            "permission": "http://creativecommons.org/licenses/by-sa/3.0/deed.en",
+            "source": "http://commons.wikimedia.org/wiki/File:Zebramanguste02.jpg",
+            "url": "http://tsammalex.clld.org/images/49fef1d6a6df8e1342efd2e49f12f78f"
+        }
+    }
+}

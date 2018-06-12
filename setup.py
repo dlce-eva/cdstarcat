@@ -2,24 +2,15 @@
 from setuptools import setup, find_packages
 
 
-def read(fname):
-    with open(fname) as fp:
-        return fp.read().split('\n\n\n')[0]
-
-
 setup(
     name='cdstarcat',
-    version="0.2.1",
+    version="0.3.0",
     description='Manage objects in a CDSTAR instance through a catalog',
-    long_description=read("README.md"),
+    long_description=open("README.md").read(),
+    long_description_content_type='text/markdown',
     author='Robert Forkel',
     author_email='forkel@shh.mpg.de',
     url='https://github.com/clld/cdstarcat',
-    install_requires=[
-        'clldutils>=1.5.1',
-        'pycdstar>=0.3',
-        'attrs',
-    ],
     license="Apache 2",
     zip_safe=False,
     keywords='',
@@ -35,11 +26,31 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy'
     ],
-    packages=find_packages(),
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
+    install_requires=[
+        'clldutils>=2.0',
+        'pycdstar>=0.4',
+        'attrs',
+    ],
+    extras_require={
+        'dev': [
+            'tox',
+            'flake8',
+            'wheel',
+            'twine',
+        ],
+        'test': [
+            'mock',
+            'pytest>=3.1',
+            'pytest-mock',
+            'pytest-cov',
+            'coverage>=4.2',
+        ],
+    },
     entry_points={
         'console_scripts': [
-            'cdstarcat=cdstarcat.cli:main',
+            'cdstarcat=cdstarcat.__main__:main',
         ]
     },
-    tests_require=['nose', 'coverage', 'mock'],
 )

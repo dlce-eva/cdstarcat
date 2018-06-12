@@ -5,37 +5,51 @@ Releasing cdstarcat
 Clone clld/cdstarcat and switch to the master branch. Then:
 
 - Do platform test via tox:
-  ```
-  $ tox -r
-  ```
-  Make sure statement coverage is at 100%
+```shell
+tox -r
+```
 
 - Make sure flake8 passes::
-  ```
-  $ flake8 --ignore=E711,E712,D100,D101,D103,D102,D301 --max-line-length=100 cdstarcat
-  ```
+```shell
+flake8 src/
+```
 
-- Change version to the new version number in `setup.py`
+- Change version to the new version number in
+  - setup.py
+  - src/cdstarcat/__init__.py
 
-- Bump version number:
-  ```
-  $ git commit -a -m"bumped version number"
-  ```
+- Commit your change of the version number:
+```shell
+git commit -a -m "release <VERSION>"
+```
 
 - Create a release tag:
-  ```
-  $ git tag -a v<version> -m"first version to be released on pypi"
-  ```
+```shell
+git tag -a v<VERSION> -m "<VERSION> release"
+```
 
-- Push to github:
-  ```
-  $ git push origin
-  $ git push --tags
-  ```
+- Release to PyPI (see https://github.com/di/markdown-description-example/issues/1#issuecomment-374474296):
+```shell
+rm dist/*
+python setup.py sdist
+twine upload dist/*
+rm dist/*
+python setup.py bdist_wheel
+twine upload dist/*
+```
 
-- Make sure your system Python has ``setuptools-git`` installed and release to
-  PyPI::
-  ```
-  $ git checkout tags/v$1
-  $ python setup.py sdist register upload
-  ```
+- Push to GitHub:
+```shell
+git push origin
+git push --tags origin
+```
+
+- Increment the version number and append `.dev0` to start the new development cycle:
+  - setup.py
+  - src/cdstarcat/__init__.py
+
+- Commit/push the version change:
+```shell
+git commit -m "bump version for development"
+git push origin
+```
