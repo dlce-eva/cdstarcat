@@ -17,6 +17,8 @@ from clldutils.path import Path, walk, as_unicode
 from clldutils.jsonlib import dump, load
 from clldutils.misc import format_size
 
+from cdstarcat.resources import RollingBlob
+
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
 requests.packages.urllib3.disable_warnings(SNIMissingWarning)
@@ -179,6 +181,13 @@ class Catalog(WithHumanReadableSize):
                     bitstreams=[bs._properties for bs in obj.bitstreams]))
             time.sleep(0.1)
             return self.objects[obj.id]
+
+    def add_rollingblob(self, fname, oid=None, collection=None, name=None, **kw):
+        rb = RollingBlob(oid=oid, collection=collection, name=name)
+        keep = kw.pop('keep', 5)
+        rb.add(self.api, fname, **kw)
+        rb.expunge(self.api, keep=keep)
+        return self.add(rb.get_object(self.api), update=True)
 
     def remove(self, obj):
         del self.objects[getattr(obj, 'id', obj)]
