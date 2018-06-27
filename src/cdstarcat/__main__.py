@@ -13,13 +13,19 @@ from collections import Counter
 from itertools import groupby, chain
 import os
 
-from clldutils.clilib import ArgumentParser
+from clldutils.clilib import ArgumentParserWithLogging, command
 from clldutils.markup import Table
 
 from cdstarcat import Catalog, OBJID_PATTERN
 
 
+@command()
 def cleanup(args):
+    """
+    cdstarcat cleanup
+
+    Deletes objects with no bitstreams from CDSTAR and the catalog.
+    """
     with _catalog(args) as cat:
         n = len(cat)
         for obj in cat:
@@ -30,10 +36,16 @@ def cleanup(args):
                 else:
                     print('deleting {0} from CDSTAR'.format(obj.id))
                     cat.delete(obj)
-        print('{0} objects deleted'.format(n - len(cat)))
+        args.log.info('{0} objects deleted'.format(n - len(cat)))
 
 
+@command()
 def stats(args):
+    """
+    cdstarcat stats
+
+    Print summary statistics of bitstreams in the catalog to stdout.
+    """
     cat = _catalog(args)
     print('Summary:')
     print('  {0:,} objects with {1:,} bitstreams of total size {2}'.format(
@@ -54,7 +66,14 @@ def stats(args):
     print(table.render(tablefmt='simple'))
 
 
+@command()
 def add(args):
+    """
+    cdstarcat add SPEC
+
+    Add metadata about objects (specified by SPEC) in CDSTAR to the catalog.
+    SPEC: Either a CDSTAR object ID or a query.
+    """
     spec = args.args[0]
     with _catalog(args) as cat:
         n = len(cat)
@@ -62,25 +81,48 @@ def add(args):
             cat.add_objids(spec)
         else:
             results = cat.add_query(spec)
-            print('{0} hits for query {1}'.format(results, spec))
-        print('{0} objects added'.format(len(cat) - n))
+            args.log.info('{0} hits for query {1}'.format(results, spec))
+        args.log.info('{0} objects added'.format(len(cat) - n))
+        return len(cat) - n
 
 
+@command()
 def create(args):
+    """
+    cdstarcat create PATH
+
+    Create objects in CDSTAR specified by PATH.
+    When PATH is a file, a single object (possibly with multiple bitstreams) is created;
+    When PATH is a directory, an object will be created for each file in the directory
+    (recursing into subdirectories).
+    """
     with _catalog(args) as cat:
         for fname, created, obj in cat.create(args.args[0], {}):
-            print('{0} -> {1} object {2.id}'.format(
+            args.log.info('{0} -> {1} object {2.id}'.format(
                 fname, 'new' if created else 'existing', obj))
 
 
+@command()
 def delete(args):
+    """
+    cdstarcat delete OID
+
+    Delete an object specified by OID from CDSTAR.
+    """
     with _catalog(args) as cat:
         n = len(cat)
         cat.delete(args.args[0])
-        print('{0} objects deleted'.format(n - len(cat)))
+        args.log.info('{0} objects deleted'.format(n - len(cat)))
+        return n - len(cat)
 
 
+@command()
 def update(args):
+    """
+    cdstarcat update OID [KEY=VALUE]+
+
+    Update the metadata of an object.
+    """
     with _catalog(args) as cat:
         cat.update_metadata(
             args.args[0], dict([arg.split('=', 1) for arg in args.args[1:]]))
@@ -91,7 +133,7 @@ def _catalog(args):
 
 
 def main():  # pragma: no cover
-    parser = ArgumentParser(__name__, stats, add, cleanup, create, delete, update)
+    parser = ArgumentParserWithLogging(__name__, stats, add, cleanup, create, delete, update)
     for arg in ['catalog', 'url', 'user', 'pwd']:
         envvar = 'CDSTAR_{0}'.format(arg.upper())
         parser.add_argument(

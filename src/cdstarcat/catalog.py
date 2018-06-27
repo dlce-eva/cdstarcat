@@ -193,7 +193,7 @@ class Catalog(WithHumanReadableSize):
         obj.delete()
         self.remove(obj.id)
 
-    def create(self, path, metadata, filter_=filter_hidden):
+    def create(self, path, metadata, filter_=filter_hidden, object_class=None):
         """
         Create objects in CDSTAR and register them in the catalog.
 
@@ -215,14 +215,14 @@ class Catalog(WithHumanReadableSize):
             raise ValueError('path must be a file or directory')  # pragma: no cover
         for fname in fnames:
             if not filter_ or filter_(fname):
-                created, obj = self._create(fname, metadata)
+                created, obj = self._create(fname, metadata, object_class=object_class)
                 yield fname, created, obj
 
-    def _create(self, path, metadata):
+    def _create(self, path, metadata, object_class=None):
         mimetype = mimetypes.guess_type(path.as_posix(), strict=False)[0] \
             or 'application/octet-stream'
         maintype, subtype = mimetype.split('/')
-        cls = getattr(media, maintype.capitalize(), media.File)
+        cls = object_class or getattr(media, maintype.capitalize(), media.File)
         file_ = cls(as_unicode(path.as_posix()))
         if file_.md5 not in self.md5_to_object:
             obj, md, bitstreams = file_.create_object(self.api, metadata)

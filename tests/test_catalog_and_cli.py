@@ -7,6 +7,7 @@ import datetime
 import pytest
 from clldutils import jsonlib
 from clldutils.path import Path
+from pycdstar import media
 
 from cdstarcat.catalog import Catalog, Object, filter_hidden
 
@@ -149,25 +150,23 @@ def test_create(mocker, tmpdir, catalog_path, cdstar_object):
     res = list(new_catalog.create(catalog_path.parent.parent, {}))
     assert len(res) > 1
 
+    res = list(new_catalog.create(catalog_path, {}, object_class=media.Audio))
+    assert len(res[0][2].bitstreams) == 2
+
 
 def test_stats(mocker, catalog_path, capsys):
     from cdstarcat.__main__ import stats
 
-    stats(mocker.Mock(args=[], catalog=catalog_path.as_posix()))
+    stats(mocker.Mock(args=[], catalog=str(catalog_path)))
     out, err = capsys.readouterr()
     assert '1 objects with 3 bitstreams' in out
 
 
-def test_add_delete(mocker, tmpdir, cdstar_object, capsys, catalog_path):
+def test_add_delete(mocker, tmpdir, cdstar_object, capsys, tmp_catalog_path):
     from cdstarcat.__main__ import delete, add
 
     obj = cdstar_object()
     _patch_api(tmpdir, mocker, cdstar_object, obj=obj)
 
-    add(mocker.Mock(args=[obj.id], catalog=catalog_path.as_posix()))
-    out, err = capsys.readouterr()
-    assert '1 objects added' in out
-
-    delete(mocker.Mock(args=[obj.id], catalog=catalog_path.as_posix()))
-    out, err = capsys.readouterr()
-    assert '1 objects deleted' in out
+    assert add(mocker.Mock(args=[obj.id], catalog=str(tmp_catalog_path))) == 1
+    assert delete(mocker.Mock(args=[obj.id], catalog=str(tmp_catalog_path))) == 1
