@@ -61,6 +61,11 @@ class RollingBlob(object):
         obj = self.get_object(cdstar)
         return sorted(obj.bitstreams, key=lambda bs: self.parse_timestamp(bs.id), reverse=True)
 
+    def latest(self, cdstar):
+        res = self.sorted_bitstreams(cdstar)
+        if res:
+            return res[0]
+
     def expunge(self, cdstar, keep=5):
         for i, bs in enumerate(self.sorted_bitstreams(cdstar)):
             if i + 1 > keep:
