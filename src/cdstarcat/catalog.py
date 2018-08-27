@@ -130,7 +130,7 @@ class Catalog(WithHumanReadableSize):
 
     def __exit__(self, *args):
         ordered = OrderedDict([(k, v.asdict()) for k, v in sorted(self.objects.items())])
-        dump(ordered, self.path, indent=4)
+        dump(ordered, self.path, indent=0, separators=(',', ':'))
 
     def __len__(self):
         """
