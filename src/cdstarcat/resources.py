@@ -67,6 +67,9 @@ class RollingBlob(object):
             return res[0]
 
     def expunge(self, cdstar, keep=5):
+        deleted = 0
         for i, bs in enumerate(self.sorted_bitstreams(cdstar)):
             if i + 1 > keep:
                 bs.delete()
+                deleted += 1
+        return deleted

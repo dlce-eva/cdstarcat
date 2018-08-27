@@ -162,6 +162,14 @@ def test_stats(mocker, catalog_path, capsys):
     assert '1 objects with 3 bitstreams' in out
 
 
+def test_cleanup(mocker, tmpdir, cdstar_object, capsys, tmp_catalog_path):
+    from cdstarcat.__main__ import cleanup
+
+    obj = cdstar_object()
+    _patch_api(tmpdir, mocker, cdstar_object, obj=obj)
+    cleanup(mocker.Mock(catalog=str(tmp_catalog_path)))
+
+
 def test_add_delete(mocker, tmpdir, cdstar_object, capsys, tmp_catalog_path):
     from cdstarcat.__main__ import delete, add
 
