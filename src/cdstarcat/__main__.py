@@ -27,16 +27,21 @@ def cleanup(args):
     Deletes objects with no bitstreams from CDSTAR and the catalog.
     """
     with _catalog(args) as cat:
-        n = len(cat)
+        n, d, r = len(cat), [], []
         for obj in cat:
             if not obj.bitstreams:
                 if obj.is_special:
                     print('removing {0} from catalog'.format(obj.id))
-                    cat.remove(obj)
+                    r.append(obj)
                 else:
                     print('deleting {0} from CDSTAR'.format(obj.id))
-                    cat.delete(obj)
+                    d.append(obj)
+        for obj in d:
+            cat.delete(obj)
+        for obj in r:
+            cat.remove(obj)
         args.log.info('{0} objects deleted'.format(n - len(cat)))
+        return n - len(cat)
 
 
 @command()

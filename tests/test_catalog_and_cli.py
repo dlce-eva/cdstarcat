@@ -4,6 +4,7 @@ import time
 from collections import OrderedDict
 import datetime
 
+from six import string_types
 import pytest
 from clldutils import jsonlib
 from clldutils.path import Path
@@ -31,6 +32,8 @@ def _patch_api(tmpdir, mocker, cdstar_object, obj=None, side_effect=None):
 
         def get_object(self, *args):
             if self.obj:
+                if args and isinstance(args[0], string_types):
+                    self.obj.id = args[0]
                 return self.obj
             if self.side_effect:
                 raise self.side_effect()
@@ -91,7 +94,7 @@ def test_empty(tmpdir, tmp_catalog_path, catalog_path):
     with Catalog(str(tmpdir.join('new.json'))) as cat1:
         assert len(cat1) == 0
         cat1[OBJID] = Catalog(catalog_path)[OBJID]
-    assert len(Catalog(str(tmp_catalog_path))) == 1
+    assert len(Catalog(str(tmp_catalog_path))) == 2
 
 
 def test_add_remove(new_catalog, cdstar_object):
@@ -159,7 +162,7 @@ def test_stats(mocker, catalog_path, capsys):
 
     stats(mocker.Mock(args=[], catalog=str(catalog_path)))
     out, err = capsys.readouterr()
-    assert '1 objects with 3 bitstreams' in out
+    assert '2 objects with 3 bitstreams' in out
 
 
 def test_cleanup(mocker, tmpdir, cdstar_object, capsys, tmp_catalog_path):
@@ -167,7 +170,7 @@ def test_cleanup(mocker, tmpdir, cdstar_object, capsys, tmp_catalog_path):
 
     obj = cdstar_object()
     _patch_api(tmpdir, mocker, cdstar_object, obj=obj)
-    cleanup(mocker.Mock(catalog=str(tmp_catalog_path)))
+    assert cleanup(mocker.Mock(catalog=str(tmp_catalog_path))) == 1
 
 
 def test_add_delete(mocker, tmpdir, cdstar_object, capsys, tmp_catalog_path):
