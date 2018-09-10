@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='cdstarcat',
-    version="0.6.2.dev0",
+    version="0.6.2",
     description='Manage objects in a CDSTAR instance through a catalog',
     long_description=open("README.md").read(),
     long_description_content_type='text/markdown',
