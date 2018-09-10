@@ -11,7 +11,7 @@ def cdstar(mocker):
         def delete(self):
             pass
     return mocker.Mock(get_object=lambda **kw: mocker.Mock(
-        bitstreams=[Bitstream('20081212T010101Z'), Bitstream('20181212T010101Z')],
+        bitstreams=[Bitstream('0081212T010101'), Bitstream('20181212T010101Z')],
         metadata=mocker.Mock(read=lambda: {'collection': 'c', 'name': 'n'})))
 
 

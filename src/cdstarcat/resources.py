@@ -24,7 +24,11 @@ class RollingBlob(object):
 
     @staticmethod
     def parse_timestamp(bsid):
-        return datetime.strptime(bsid.split('_')[-1].split('.')[0], TIMESTAMP_FORMAT)
+        try:
+            return datetime.strptime(bsid.split('_')[-1].split('.')[0], TIMESTAMP_FORMAT)
+        except ValueError:
+            # Make sure invalid timestamps are sorted as earlier than any valid ones.
+            return datetime.strptime('19000101T000000Z', TIMESTAMP_FORMAT)
 
     def get_object(self, cdstar):
         obj = cdstar.get_object(uid=self.oid)
