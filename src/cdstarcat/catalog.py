@@ -153,7 +153,12 @@ class Catalog(WithHumanReadableSize):
 
     def __getitem__(self, item):
         item = getattr(item, 'id', item)
-        return self.objects.get(item, self.md5_to_object.get(item))
+        if item in self.objects:
+            return self.objects[item]
+        md5_to_objects = self.md5_to_object
+        if item in md5_to_objects:
+            return md5_to_objects[item]
+        raise KeyError(item)
 
     def __setitem__(self, item, obj):
         objid = getattr(item, 'id', item)

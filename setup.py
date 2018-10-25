@@ -30,7 +30,7 @@ setup(
     package_dir={"": "src"},
     install_requires=[
         'clldutils>=2.0',
-        'pycdstar>=0.4',
+        'pycdstar>=0.4.2',
         'attrs',
     ],
     extras_require={

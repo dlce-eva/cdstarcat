@@ -48,6 +48,14 @@ def _patch_api(tmpdir, mocker, cdstar_object, obj=None, side_effect=None):
     return Catalog(str(tmpdir.join('new.json')))
 
 
+def test_getitem(catalog_path):
+    cat = Catalog(catalog_path)
+    with pytest.raises(KeyError):
+        _ = cat['xyz']
+
+    assert len(cat['49fef1d6a6df8e1342efd2e49f12f78f']) == 1
+
+
 def test_misc(tmpdir):
     assert not filter_hidden(Path(str(tmpdir)) / '.hiddenä')
     assert filter_hidden(Path(str(tmpdir.join('not_hidden'))))
