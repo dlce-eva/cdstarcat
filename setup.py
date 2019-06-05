@@ -31,7 +31,7 @@ setup(
     install_requires=[
         'clldutils>=2.0',
         'pycdstar>=1.0.0',
-        'attrs',
+        'attrs>=18.1',
     ],
     extras_require={
         'dev': [
