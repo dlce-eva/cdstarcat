@@ -1,4 +1,3 @@
-# coding: utf8
 """
 Main command line interface of the cdstarcat package.
 
@@ -7,7 +6,6 @@ The basic invocation looks like
     cdstarcat [OPTIONS] <command> [args]
 
 """
-from __future__ import unicode_literals, print_function
 import sys
 from collections import Counter
 from itertools import groupby, chain
@@ -148,5 +146,5 @@ def main():  # pragma: no cover
     sys.exit(parser.main())
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

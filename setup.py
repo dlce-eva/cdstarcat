@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='cdstarcat',
-    version="0.6.3.dev0",
+    version="1.0.0.dev0",
     description='Manage objects in a CDSTAR instance through a catalog',
     long_description=open("README.md").read(),
     long_description_content_type='text/markdown',
@@ -30,7 +30,7 @@ setup(
     package_dir={"": "src"},
     install_requires=[
         'clldutils>=2.0',
-        'pycdstar>=0.4.2',
+        'pycdstar>=1.0.0',
         'attrs',
     ],
     extras_require={

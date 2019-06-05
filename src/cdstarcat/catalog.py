@@ -1,9 +1,9 @@
-from __future__ import print_function, unicode_literals, division
 import time
 from collections import OrderedDict, defaultdict
 import datetime
 import re
 import mimetypes
+import pathlib
 
 import requests
 from requests.packages.urllib3.exceptions import (
@@ -12,8 +12,8 @@ from requests.packages.urllib3.exceptions import (
 import attr
 
 from pycdstar import media
+from pycdstar.catalog import filter_hidden, iter_files
 from pycdstar.api import Cdstar
-from clldutils.path import Path, walk, as_unicode
 from clldutils.jsonlib import dump, load
 from clldutils.misc import format_size
 
@@ -98,10 +98,6 @@ class Object(WithHumanReadableSize):
         )
 
 
-def filter_hidden(fname):
-    return not as_unicode(fname.stem).startswith('.')
-
-
 class Catalog(WithHumanReadableSize):
     """
     A catalog of objects in a CDSTAR instance.
@@ -110,11 +106,10 @@ class Catalog(WithHumanReadableSize):
     make sure changes are written to disk.
     """
     def __init__(self, path, cdstar_url=None, cdstar_user=None, cdstar_pwd=None):
-        self.path = Path(path)
+        self.path = pathlib.Path(path)
+        self.objects = {}
         if self.path.exists():
             self.objects = {i: Object.fromdict(i, d) for i, d in load(self.path).items()}
-        else:
-            self.objects = {}
         self.api = Cdstar(service_url=cdstar_url, user=cdstar_user, password=cdstar_pwd)
 
     @property
@@ -220,24 +215,17 @@ class Catalog(WithHumanReadableSize):
         :param filter_:
         :return:
         """
-        path = Path(path)
-        if path.is_file():
-            fnames = [path]
-        elif path.is_dir():
-            fnames = list(walk(path, mode='files'))
-        else:
-            raise ValueError('path must be a file or directory')  # pragma: no cover
-        for fname in fnames:
+        for fname in iter_files(path):
             if not filter_ or filter_(fname):
                 created, obj = self._create(fname, metadata, object_class=object_class)
                 yield fname, created, obj
 
     def _create(self, path, metadata, object_class=None):
-        mimetype = mimetypes.guess_type(path.as_posix(), strict=False)[0] \
+        mimetype = mimetypes.guess_type(str(path), strict=False)[0] \
             or 'application/octet-stream'
         maintype, subtype = mimetype.split('/')
         cls = object_class or getattr(media, maintype.capitalize(), media.File)
-        file_ = cls(as_unicode(path.as_posix()))
+        file_ = cls(path)
         if file_.md5 not in self.md5_to_object:
             obj, md, bitstreams = file_.create_object(self.api, metadata)
             return True, self.add(obj, metadata=md)

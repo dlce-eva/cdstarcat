@@ -1,10 +1,8 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
 import time
 from collections import OrderedDict
 import datetime
+import logging
 
-from six import string_types
 import pytest
 from clldutils import jsonlib
 from clldutils.path import Path
@@ -30,9 +28,9 @@ def _patch_api(tmpdir, mocker, cdstar_object, obj=None, side_effect=None):
         def __call__(self, *args, **kw):
             return self
 
-        def get_object(self, *args):
+        def get_object(self, *args, **kw):
             if self.obj:
-                if args and isinstance(args[0], string_types):
+                if args and isinstance(args[0], str):
                     self.obj.id = args[0]
                 return self.obj
             if self.side_effect:
@@ -189,3 +187,30 @@ def test_add_delete(mocker, tmpdir, cdstar_object, capsys, tmp_catalog_path):
 
     assert add(mocker.Mock(args=[obj.id], catalog=str(tmp_catalog_path))) == 1
     assert delete(mocker.Mock(args=[obj.id], catalog=str(tmp_catalog_path))) == 1
+    assert add(mocker.Mock(args=['abc'], catalog=str(tmp_catalog_path))) == 1
+
+
+def test_cli_update(mocker, tmpdir, cdstar_object, tmp_catalog_path):
+    from cdstarcat.__main__ import update
+
+    obj = cdstar_object()
+    _patch_api(tmpdir, mocker, cdstar_object, obj=obj)
+    update(mocker.Mock(args=["EAEA0-0005-07E0-246C-0", 'name=x'], catalog=str(tmp_catalog_path)))
+
+
+def test_cli_create(mocker, tmpdir, cdstar_object, tmp_catalog_path, caplog):
+    from cdstarcat.__main__ import create
+
+    caplog.set_level(logging.INFO)
+    obj = cdstar_object()
+    _patch_api(tmpdir, mocker, cdstar_object, obj=obj)
+    create(mocker.Mock(args=[__file__], log=logging.getLogger(), catalog=str(tmp_catalog_path)))
+    assert any('new object' in r.msg for r in caplog.records)
+
+
+def test_add_rollingblob(tmp_catalog_path, cdstar_object, mocker, tmpdir):
+    obj = cdstar_object()
+    _patch_api(tmpdir, mocker, cdstar_object, obj=obj)
+    cat = Catalog(str(tmp_catalog_path))
+    cat.add_rollingblob(
+        __file__, oid=obj.id, timestamp='20191212T202020Z', suffix='zip', mimetype='text/html')

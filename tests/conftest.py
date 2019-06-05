@@ -1,6 +1,3 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
-
 import py
 import pytest
 from mock import Mock
@@ -23,7 +20,7 @@ def tmp_catalog_path(tmpdir):
 
 
 class CdstarObject(object):
-    metadata = Mock(read=Mock(return_value={}))
+    metadata = Mock(read=Mock(return_value={'name': 'n', 'collection': 'c'}))
     bitstreams = [Mock(_properties={
         'bitstreamid': 'the.txt',
         'filesize': 5,
