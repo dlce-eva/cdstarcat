@@ -5,12 +5,12 @@ Releasing cdstarcat
 Clone clld/cdstarcat and switch to the master branch. Then:
 
 - Do platform test via tox:
-```shell
+```shell script
 tox -r
 ```
 
 - Make sure flake8 passes::
-```shell
+```shell script
 flake8 src/
 ```
 
@@ -19,17 +19,17 @@ flake8 src/
   - src/cdstarcat/__init__.py
 
 - Commit your change of the version number:
-```shell
+```shell script
 git commit -a -m "release <VERSION>"
 ```
 
 - Create a release tag:
-```shell
+```shell script
 git tag -a v<VERSION> -m "<VERSION> release"
 ```
 
 - Release to PyPI (see https://github.com/di/markdown-description-example/issues/1#issuecomment-374474296):
-```shell
+```shell script
 rm dist/*
 python setup.py sdist
 twine upload dist/*
@@ -39,7 +39,7 @@ twine upload dist/*
 ```
 
 - Push to GitHub:
-```shell
+```shell script
 git push origin
 git push --tags origin
 ```
@@ -49,7 +49,7 @@ git push --tags origin
   - src/cdstarcat/__init__.py
 
 - Commit/push the version change:
-```shell
+```shell script
 git commit -a -m "bump version for development"
 git push origin
 ```
