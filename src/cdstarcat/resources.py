@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 # We use a timestamp format which is compatible with the syntax of CDSTAR bitstream names:
 TIMESTAMP_FORMAT = '%Y%m%dT%H%M%SZ'
@@ -23,10 +23,10 @@ class RollingBlob(object):
     @staticmethod
     def parse_timestamp(bsid):
         try:
-            return datetime.strptime(bsid.split('_')[-1].split('.')[0], TIMESTAMP_FORMAT)
+            return datetime.datetime.strptime(bsid.split('_')[-1].split('.')[0], TIMESTAMP_FORMAT)
         except (ValueError, TypeError):
             # Make sure invalid timestamps are sorted as earlier than any valid ones.
-            return datetime.strptime('19000101T000000Z', TIMESTAMP_FORMAT)
+            return datetime.datetime.strptime('19000101T000000Z', TIMESTAMP_FORMAT)
 
     def get_object(self, cdstar):
         obj = cdstar.get_object(uid=self.oid)
@@ -46,9 +46,9 @@ class RollingBlob(object):
     def add(self, cdstar, fname, suffix='', timestamp=None, mimetype=None):
         if '_' in suffix:
             raise ValueError(suffix)
-        timestamp = timestamp or datetime.utcnow()
+        timestamp = timestamp or datetime.datetime.utcnow()
         if isinstance(timestamp, str):
-            timestamp = datetime.strptime(timestamp, TIMESTAMP_FORMAT)
+            timestamp = datetime.datetime.strptime(timestamp, TIMESTAMP_FORMAT)
         if suffix and not suffix.startswith('.'):
             suffix = '.' + suffix
         obj = self.get_object(cdstar)

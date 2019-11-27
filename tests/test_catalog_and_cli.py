@@ -1,7 +1,7 @@
 import time
-from collections import OrderedDict
-import datetime
 import logging
+import datetime
+import collections
 
 import pytest
 from clldutils import jsonlib
@@ -9,6 +9,7 @@ from clldutils.path import Path
 from pycdstar import media
 
 from cdstarcat.catalog import Catalog, Object, filter_hidden
+from cdstarcat.__main__ import main
 
 OBJID = "EAEA0-0005-07E0-246C-0"
 
@@ -72,7 +73,7 @@ def test_idempotency(catalog_path, tmp_catalog_path):
         orig = fp.read()
     with Catalog(str(tmp_catalog_path)) as c:
         obj = c[OBJID].asdict()
-        obj['metadata'] = OrderedDict(sorted(obj['metadata'].items(), reverse=True))
+        obj['metadata'] = collections.OrderedDict(sorted(obj['metadata'].items(), reverse=True))
         c[OBJID] = Object.fromdict(OBJID, obj)
     assert orig.split() == tmp_catalog_path.read_text('utf8').split()
 
@@ -163,48 +164,51 @@ def test_create(mocker, tmpdir, catalog_path, cdstar_object):
     assert len(res[0][2].bitstreams) == 2
 
 
-def test_stats(mocker, catalog_path, capsys):
-    from cdstarcat.__main__ import stats
+def test_cli_help(capsys):
+    main([])
+    out, _ = capsys.readouterr()
+    assert 'usage' in out
 
-    stats(mocker.Mock(args=[], catalog=str(catalog_path)))
-    out, err = capsys.readouterr()
+
+def test_cli_stats(catalog_path, capsys):
+    main(['--catalog', str(catalog_path), 'stats'])
+
+    out, _ = capsys.readouterr()
     assert '2 objects with 3 bitstreams' in out
 
 
-def test_cleanup(mocker, tmpdir, cdstar_object, capsys, tmp_catalog_path):
-    from cdstarcat.__main__ import cleanup
-
+def test_cli_cleanup(mocker, tmpdir, cdstar_object, capsys, tmp_catalog_path):
     obj = cdstar_object()
     _patch_api(tmpdir, mocker, cdstar_object, obj=obj)
-    assert cleanup(mocker.Mock(catalog=str(tmp_catalog_path))) == 1
+
+    main(['--catalog', str(tmp_catalog_path), 'cleanup'])
+    out, _ = capsys.readouterr()
+    assert 'deleting' in out
 
 
 def test_add_delete(mocker, tmpdir, cdstar_object, capsys, tmp_catalog_path):
-    from cdstarcat.__main__ import delete, add
-
     obj = cdstar_object()
     _patch_api(tmpdir, mocker, cdstar_object, obj=obj)
 
-    assert add(mocker.Mock(args=[obj.id], catalog=str(tmp_catalog_path))) == 1
-    assert delete(mocker.Mock(args=[obj.id], catalog=str(tmp_catalog_path))) == 1
-    assert add(mocker.Mock(args=['abc'], catalog=str(tmp_catalog_path))) == 1
+    main(['--catalog', str(tmp_catalog_path), 'add', obj.id])
+    main(['--catalog', str(tmp_catalog_path), 'delete', obj.id])
+    main(['--catalog', str(tmp_catalog_path), 'add', 'abc'])
+
+    with pytest.raises(SystemExit):
+        main(['--catalog', str(tmp_catalog_path), 'delete', 'abc'])
 
 
 def test_cli_update(mocker, tmpdir, cdstar_object, tmp_catalog_path):
-    from cdstarcat.__main__ import update
-
     obj = cdstar_object()
     _patch_api(tmpdir, mocker, cdstar_object, obj=obj)
-    update(mocker.Mock(args=["EAEA0-0005-07E0-246C-0", 'name=x'], catalog=str(tmp_catalog_path)))
+    main(['--catalog', str(tmp_catalog_path), 'update', 'EAEA0-0005-07E0-246C-0', 'name=x'])
 
 
 def test_cli_create(mocker, tmpdir, cdstar_object, tmp_catalog_path, caplog):
-    from cdstarcat.__main__ import create
-
     caplog.set_level(logging.INFO)
     obj = cdstar_object()
     _patch_api(tmpdir, mocker, cdstar_object, obj=obj)
-    create(mocker.Mock(args=[__file__], log=logging.getLogger(), catalog=str(tmp_catalog_path)))
+    main(['--catalog', str(tmp_catalog_path), 'create', __file__], log=logging.getLogger())
     assert any('new object' in r.msg for r in caplog.records)
 
 

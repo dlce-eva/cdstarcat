@@ -1,15 +1,15 @@
+import pathlib
+
 import py
 import pytest
 from mock import Mock
-from clldutils.path import Path
 
 from pycdstar.media import File
 
 
-
 @pytest.fixture
 def catalog_path():
-    return Path(__file__).parent / 'fixtures' / 'catalog.json'
+    return pathlib.Path(__file__).parent / 'fixtures' / 'catalog.json'
 
 
 @pytest.fixture

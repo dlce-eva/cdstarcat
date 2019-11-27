@@ -1,9 +1,9 @@
-import time
-from collections import OrderedDict, defaultdict
-import datetime
 import re
-import mimetypes
+import time
 import pathlib
+import datetime
+import mimetypes
+import collections
 
 import requests
 from requests.packages.urllib3.exceptions import (
@@ -62,7 +62,7 @@ class Bitstream(WithHumanReadableSize):
             d['last-modified'])
 
     def asdict(self):
-        return OrderedDict([
+        return collections.OrderedDict([
             ("bitstreamid", self.id),
             ("checksum", self.md5),
             ("created", self.created),
@@ -92,9 +92,10 @@ class Object(WithHumanReadableSize):
         return cls(id_, [Bitstream.fromdict(bs) for bs in d['bitstreams']], d['metadata'])
 
     def asdict(self):
-        return OrderedDict([
+        return collections.OrderedDict([
             ('bitstreams', [bs.asdict() for bs in self.bitstreams]),
-            ('metadata', OrderedDict([(k, v) for k, v in sorted(self.metadata.items())]))]
+            ('metadata', collections.OrderedDict(
+                [(k, v) for k, v in sorted(self.metadata.items())]))]
         )
 
 
@@ -114,7 +115,7 @@ class Catalog(WithHumanReadableSize):
 
     @property
     def md5_to_object(self):
-        res = defaultdict(list)
+        res = collections.defaultdict(list)
         for obj in self.objects.values():
             for bs in obj.bitstreams:
                 res[bs.md5].append(obj)
@@ -124,7 +125,8 @@ class Catalog(WithHumanReadableSize):
         return self
 
     def __exit__(self, *args):
-        ordered = OrderedDict([(k, v.asdict()) for k, v in sorted(self.objects.items())])
+        ordered = collections.OrderedDict(
+            [(k, v.asdict()) for k, v in sorted(self.objects.items())])
         dump(ordered, self.path, indent=0, separators=(',', ':'))
 
     def __len__(self):

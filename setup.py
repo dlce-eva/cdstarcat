@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
 
 
@@ -29,7 +28,7 @@ setup(
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     install_requires=[
-        'clldutils>=2.0',
+        'clldutils>=3.5',
         'pycdstar>=1.0.0',
         'attrs>=18.1',
     ],
