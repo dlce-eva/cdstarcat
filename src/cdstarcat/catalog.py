@@ -117,7 +117,7 @@ class Catalog(WithHumanReadableSize):
                     for filename in z.namelist():
                         with z.open(filename) as f:
                             self.objects = {i: Object.fromdict(i, d)\
-                                 for i, d in json.loads(f.read(), encoding='utf-8').items()}
+                                 for i, d in json.loads(f.read().decode('utf-8'), encoding='utf-8').items()}
                         break
             else:
                 self.objects = {i: Object.fromdict(i, d) for i, d in load(self.path).items()}
