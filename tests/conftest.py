@@ -13,6 +13,11 @@ def catalog_path():
 
 
 @pytest.fixture
+def zipped_catalog_path():
+    return pathlib.Path(__file__).parent / 'fixtures' / 'catalog.json.zip'
+
+
+@pytest.fixture
 def tmp_catalog_path(tmpdir):
     catalog_path = tmpdir.join('cat.json')
     py.path.local(__file__).dirpath('fixtures', 'catalog.json').copy(catalog_path)

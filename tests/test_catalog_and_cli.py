@@ -104,6 +104,16 @@ def test_empty(tmpdir, tmp_catalog_path, catalog_path):
     assert len(Catalog(str(tmp_catalog_path))) == 2
 
 
+def test_create_read_zipped_json(tmpdir, zipped_catalog_path):
+    p = str(tmpdir.join('new.json.zip'))
+    with Catalog(p) as cat1:
+        assert len(cat1) == 0
+        cat1[OBJID] = Catalog(zipped_catalog_path)[OBJID]
+    with Catalog(p) as cat1:
+        assert len(cat1) == 1
+        cat1[OBJID].metadata['collection'] == 'tsammalex'
+
+
 def test_add_remove(new_catalog, cdstar_object):
     assert new_catalog.size == 0
     obj = new_catalog.add(cdstar_object())
