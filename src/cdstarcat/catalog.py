@@ -138,7 +138,7 @@ class Catalog(WithHumanReadableSize):
         ordered = collections.OrderedDict(
             [(k, v.asdict()) for k, v in sorted(self.objects.items())])
         if self.path.suffix.lower() == '.zip':
-            with zipfile.ZipFile(self.path, 'w', zipfile.ZIP_DEFLATED) as z:
+            with zipfile.ZipFile(str(self.path), 'w', zipfile.ZIP_DEFLATED) as z:
                 z.writestr(self.path.stem,
                         json.dumps(ordered, ensure_ascii=False, indent=0, separators=(',', ':')))
         else:
