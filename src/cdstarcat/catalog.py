@@ -116,8 +116,8 @@ class Catalog(WithHumanReadableSize):
                 with zipfile.ZipFile(str(self.path), 'r') as z:
                     for filename in z.namelist():
                         with z.open(filename) as f:
-                            self.objects = {i: Object.fromdict(i, d)\
-                                 for i, d in json.loads(f.read().decode('utf-8'), encoding='utf-8').items()}
+                            self.objects = {i: Object.fromdict(i, d) for i, d in json.loads(
+                                f.read().decode('utf-8'), encoding='utf-8').items()}
                         break
             else:
                 self.objects = {i: Object.fromdict(i, d) for i, d in load(self.path).items()}
@@ -139,8 +139,8 @@ class Catalog(WithHumanReadableSize):
             [(k, v.asdict()) for k, v in sorted(self.objects.items())])
         if self.path.suffix.lower() == '.zip':
             with zipfile.ZipFile(str(self.path), 'w', zipfile.ZIP_DEFLATED) as z:
-                z.writestr(self.path.stem,
-                        json.dumps(ordered, ensure_ascii=False, indent=0, separators=(',', ':')))
+                z.writestr(self.path.stem, json.dumps(
+                    ordered, ensure_ascii=False, indent=0, separators=(',', ':')))
         else:
             dump(ordered, self.path, indent=0, separators=(',', ':'))
 

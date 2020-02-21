@@ -53,7 +53,6 @@ class CdstarObject(object):
             'last-modified': 7}))
 
 
-
 @pytest.fixture
 def cdstar_object():
     return CdstarObject
