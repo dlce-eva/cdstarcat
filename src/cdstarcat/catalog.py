@@ -1,6 +1,8 @@
 import re
 import time
+import json
 import pathlib
+import zipfile
 import datetime
 import mimetypes
 import collections
@@ -110,7 +112,15 @@ class Catalog(WithHumanReadableSize):
         self.path = pathlib.Path(path)
         self.objects = {}
         if self.path.exists():
-            self.objects = {i: Object.fromdict(i, d) for i, d in load(self.path).items()}
+            if self.path.suffix.lower() == '.zip':
+                with zipfile.ZipFile(self.path, 'r') as z:
+                    for filename in z.namelist():
+                        with z.open(filename) as f:
+                            self.objects = {i: Object.fromdict(i, d)\
+                                 for i, d in json.loads(f.read(), encoding='utf-8').items()}
+                        break
+            else:
+                self.objects = {i: Object.fromdict(i, d) for i, d in load(self.path).items()}
         self.api = Cdstar(service_url=cdstar_url, user=cdstar_user, password=cdstar_pwd)
 
     @property
@@ -127,7 +137,12 @@ class Catalog(WithHumanReadableSize):
     def __exit__(self, *args):
         ordered = collections.OrderedDict(
             [(k, v.asdict()) for k, v in sorted(self.objects.items())])
-        dump(ordered, self.path, indent=0, separators=(',', ':'))
+        if self.path.suffix.lower() == '.zip':
+            with zipfile.ZipFile(self.path, 'w', zipfile.ZIP_DEFLATED) as z:
+                z.writestr(self.path.stem,
+                        json.dumps(ordered, ensure_ascii=False, indent=0, separators=(',', ':')))
+        else:
+            dump(ordered, self.path, indent=0, separators=(',', ':'))
 
     def __len__(self):
         """
