@@ -113,7 +113,7 @@ class Catalog(WithHumanReadableSize):
         self.objects = {}
         if self.path.exists():
             if self.path.suffix.lower() == '.zip':
-                with zipfile.ZipFile(self.path, 'r') as z:
+                with zipfile.ZipFile(str(self.path), 'r') as z:
                     for filename in z.namelist():
                         with z.open(filename) as f:
                             self.objects = {i: Object.fromdict(i, d)\
