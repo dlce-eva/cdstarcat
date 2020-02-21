@@ -8,6 +8,7 @@ def cdstar(mocker):
     class Bitstream(object):
         def __init__(self, id_):
             self.id = id_
+
         def delete(self):
             pass
     return mocker.Mock(get_object=lambda **kw: mocker.Mock(
