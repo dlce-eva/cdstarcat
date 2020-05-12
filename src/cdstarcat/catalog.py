@@ -201,9 +201,7 @@ class Catalog(WithHumanReadableSize):
 
     def add_rollingblob(self, fname, oid=None, collection=None, name=None, **kw):
         rb = RollingBlob(oid=oid, collection=collection, name=name)
-        keep = kw.pop('keep', 5)
         rb.add(self.api, fname, **kw)
-        rb.expunge(self.api, keep=keep)
         return self.add(rb.get_object(self.api), update=True)
 
     def remove(self, obj):
