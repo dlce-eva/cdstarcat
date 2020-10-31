@@ -2,7 +2,7 @@ import pathlib
 
 import py
 import pytest
-from mock import Mock
+from unittest.mock import Mock
 
 from pycdstar.media import File
 

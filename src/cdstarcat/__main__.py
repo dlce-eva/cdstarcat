@@ -9,17 +9,18 @@ from clldutils.loglib import Logging
 from clldutils.clilib import get_parser_and_subparsers, register_subcommands
 
 from cdstarcat import Catalog
+from cdstarcat.cli_util import add_cdstar
 import cdstarcat.commands
 
 
 def main(args=None, catch_all=False, parsed_args=None, log=None):
     parser, subparsers = get_parser_and_subparsers('cdstarcat')
-    for arg in ['catalog', 'url', 'user', 'pwd']:
-        envvar = 'CDSTAR_{0}'.format(arg.upper())
-        parser.add_argument(
-            '--' + arg,
-            help="defaults to ${0}".format(envvar),
-            default=os.environ.get(envvar))
+    envvar = 'CDSTAR_CATALOG'
+    parser.add_argument(
+        '--catalog',
+        help="defaults to ${0}".format(envvar),
+        default=os.environ.get(envvar))
+    add_cdstar(parser)
     register_subcommands(subparsers, cdstarcat.commands)
 
     args = parsed_args or parser.parse_args(args=args)
@@ -29,7 +30,8 @@ def main(args=None, catch_all=False, parsed_args=None, log=None):
         return 1
 
     with contextlib.ExitStack() as stack:
-        args.catalog = stack.enter_context(Catalog(args.catalog, args.url, args.user, args.pwd))
+        args.catalog = stack.enter_context(Catalog(
+            args.catalog, cdstar_url=args.url, cdstar_user=args.user, cdstar_pwd=args.pwd))
         if not log:  # pragma: no cover
             stack.enter_context(Logging(args.log, level=args.log_level))
         else:

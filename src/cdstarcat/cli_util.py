@@ -1,3 +1,4 @@
+import os
 import argparse
 
 from cdstarcat.catalog import OBJID_PATTERN
@@ -17,3 +18,12 @@ def add_objid(parser):
         type=OBJIDType(),
         help='ID of an object in CDSTAR',
     )
+
+
+def add_cdstar(parser):
+    for arg in ['url', 'user', 'pwd']:
+        envvar = 'CDSTAR_{0}'.format(arg.upper())
+        parser.add_argument(
+            '--' + arg,
+            help="defaults to ${0}".format(envvar),
+            default=os.environ.get(envvar))

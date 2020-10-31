@@ -8,9 +8,7 @@ import mimetypes
 import collections
 
 import requests
-from requests.packages.urllib3.exceptions import (
-    InsecureRequestWarning, InsecurePlatformWarning, SNIMissingWarning,
-)
+from requests.packages.urllib3.exceptions import InsecureRequestWarning, InsecurePlatformWarning
 import attr
 
 from pycdstar import media
@@ -23,7 +21,6 @@ from cdstarcat.resources import RollingBlob
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
-requests.packages.urllib3.disable_warnings(SNIMissingWarning)
 
 mimetypes.add_type('video/mp4', '.mod', strict=False)
 
@@ -117,7 +114,7 @@ class Catalog(WithHumanReadableSize):
                     for filename in z.namelist():
                         with z.open(filename) as f:
                             self.objects = {i: Object.fromdict(i, d) for i, d in json.loads(
-                                f.read().decode('utf-8'), encoding='utf-8').items()}
+                                f.read().decode('utf-8')).items()}
                         break
             else:
                 self.objects = {i: Object.fromdict(i, d) for i, d in load(self.path).items()}
@@ -228,13 +225,18 @@ class Catalog(WithHumanReadableSize):
         otherwise uncommon types to the list of known types using `mimetypes.add_type`.
 
         :param path:
-        :param metadata:
-        :param filter_:
+        :param metadata: A metadata `dict` or a `callable` accepting a `Path` as sole argument \
+        and returning a metadata `dict`.
+        :param filter_: A `callable` accepting a `Path` as sole argument and returning `True` if \
+        the corresponding file should be uploaded, `False` otherwise.
         :return:
         """
         for fname in iter_files(path):
             if not filter_ or filter_(fname):
-                created, obj = self._create(fname, metadata, object_class=object_class)
+                created, obj = self._create(
+                    fname,
+                    metadata if isinstance(metadata, dict) else metadata(fname),
+                    object_class=object_class)
                 yield fname, created, obj
 
     def _create(self, path, metadata, object_class=None):
