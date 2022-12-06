@@ -1,6 +1,6 @@
 # cdstarcat
 
-[![Build Status](https://github.com/clld/cdstarcat/workflows/tests/badge.svg)](https://github.com/clld/cdstarcat/actions?query=workflow%3Atests)
+[![Build Status](https://github.com/dlce-eva/cdstarcat/workflows/tests/badge.svg)](https://github.com/dlce-eva/cdstarcat/actions?query=workflow%3Atests)
 [![PyPI](https://img.shields.io/pypi/v/cdstarcat.svg)](https://pypi.python.org/pypi/cdstarcat)
 
 Manage objects in a CDSTAR instance using a local catalog.
