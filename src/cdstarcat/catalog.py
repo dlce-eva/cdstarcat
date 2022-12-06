@@ -274,6 +274,6 @@ class Catalog(WithHumanReadableSize):
             results = search(offset)
         return total_results
 
-    def add_objids(self, *objids):
+    def add_objids(self, *objids, **kw):
         for objid in objids:
-            self.add(self.api.get_object(objid))
+            self.add(self.api.get_object(objid), update=kw.get('update', False))
