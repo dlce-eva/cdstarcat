@@ -39,7 +39,7 @@ to get usage information for a particular subcommand.
 
 Typically, `cdstarcat` will be used programmatically, to implement recurring media file maintenance tasks
 within projects - such as 
-[uploading media files for a new submission to Dictionaria](https://github.com/clld/dictionaria-intern/blob/292644d23c0495d5a339bae1a0696ffe3129dcbf/pydictionaria/commands.py#L22-L42).
+[uploading media files for a new submission to Dictionaria](https://github.com/dictionaria/dictionaria-intern/blob/292644d23c0495d5a339bae1a0696ffe3129dcbf/pydictionaria/commands.py#L22-L42).
 
 In the simplest case this could look as follows:
 ```python

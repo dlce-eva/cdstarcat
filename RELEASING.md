@@ -15,7 +15,7 @@ flake8 src/
 ```
 
 - Change version to the new version number in
-  - setup.py
+  - setup.cfg
   - src/cdstarcat/__init__.py
 
 - Commit your change of the version number:
@@ -28,13 +28,10 @@ git commit -a -m "release <VERSION>"
 git tag -a v<VERSION> -m "<VERSION> release"
 ```
 
-- Release to PyPI (see https://github.com/di/markdown-description-example/issues/1#issuecomment-374474296):
+- Release to PyPI:
 ```shell script
 rm dist/*
-python setup.py sdist
-twine upload dist/*
-rm dist/*
-python setup.py bdist_wheel
+python -m build -n
 twine upload dist/*
 ```
 
@@ -45,7 +42,7 @@ git push --tags origin
 ```
 
 - Increment the version number and append `.dev0` to start the new development cycle:
-  - setup.py
+  - setup.cfg
   - src/cdstarcat/__init__.py
 
 - Commit/push the version change:
