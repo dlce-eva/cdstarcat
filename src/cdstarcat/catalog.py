@@ -8,7 +8,12 @@ import mimetypes
 import collections
 
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning, InsecurePlatformWarning
+try:
+    from requests.packages.urllib3.exceptions import InsecureRequestWarning, InsecurePlatformWarning
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+    requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
+except ImportError:
+    pass
 import attr
 
 from pycdstar import media
@@ -19,8 +24,6 @@ from clldutils.misc import format_size
 
 from cdstarcat.resources import RollingBlob
 
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
 
 mimetypes.add_type('video/mp4', '.mod', strict=False)
 
