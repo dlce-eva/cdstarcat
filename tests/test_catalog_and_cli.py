@@ -1,5 +1,6 @@
 import time
 import logging
+import pathlib
 import datetime
 import collections
 
@@ -185,6 +186,21 @@ def test_cli_stats(catalog_path, capsys):
 
     out, _ = capsys.readouterr()
     assert '2 objects with 3 bitstreams' in out
+
+
+def test_cli_download(catalog_path, tmp_path, mocker, caplog):
+    def mock_urlretrieve(url, p):
+        pathlib.Path(p).write_text('abc')
+
+    mocker.patch('cdstarcat.commands.download.urlretrieve', mock_urlretrieve)
+    main(['--catalog', str(catalog_path), 'download', str(tmp_path)])
+    assert tmp_path.joinpath('EAEA0-0005-07E0-246C-0', 'full.jpg').exists()
+
+    with caplog.at_level(logging.WARNING):
+        main(
+            ['--catalog', str(catalog_path), 'download', str(tmp_path), '--check-md5'],
+            log=logging.getLogger(__name__))
+    assert len(caplog.records) > 1
 
 
 def test_cli_cleanup(mocker, tmpdir, cdstar_object, capsys, tmp_catalog_path):

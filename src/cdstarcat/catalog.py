@@ -12,7 +12,7 @@ try:
     from requests.packages.urllib3.exceptions import InsecureRequestWarning, InsecurePlatformWarning
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
 import attr
 
@@ -47,11 +47,11 @@ class Bitstream(WithHumanReadableSize):
 
     @property
     def created_datetime(self):
-        return datetime.datetime.utcfromtimestamp(self.created / 1e3)
+        return datetime.datetime.fromtimestamp(self.created / 1e3)
 
     @property
     def modified_datetime(self):
-        return datetime.datetime.utcfromtimestamp(self.modified / 1e3)
+        return datetime.datetime.fromtimestamp(self.modified / 1e3)
 
     @classmethod
     def fromdict(cls, d):
