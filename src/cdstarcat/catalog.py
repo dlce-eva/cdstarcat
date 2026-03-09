@@ -267,7 +267,8 @@ class Catalog(WithHumanReadableSize):
             return True, self.add(obj, metadata=md)
         return False, self.md5_to_object[file_.md5][0]
 
-    def update_metadata(self, obj, metadata, mode='merge'):
+    def update_metadata(self, obj: Union[str, Object], metadata: dict, mode='merge'):
+        """Update the metadata of an object in the catalog and in CDSTAR."""
         objid = getattr(obj, 'id', obj)
         assert OBJID_PATTERN.match(objid) and objid in self
         obj = self.api.get_object(objid)
@@ -276,7 +277,8 @@ class Catalog(WithHumanReadableSize):
         obj.metadata = md
         return self.add(obj, md, update=True)
 
-    def add_query(self, query, limit=500, offset=0):
+    def add_query(self, query: Union[dict, str], limit: int = 500, offset: int = 0) -> int:
+        """Add objects from CDSTAR search results to the catalog."""
         def search(offset):
             time.sleep(0.2)
             return self.api.search(query, index='metadata', limit=limit, offset=offset)
@@ -291,6 +293,7 @@ class Catalog(WithHumanReadableSize):
             results = search(offset)
         return total_results
 
-    def add_objids(self, *objids, **kw):
+    def add_objids(self, *objids: str, update=False):
+        """Add CDSTAR objects specified by objid to the catalog."""
         for objid in objids:
-            self.add(self.api.get_object(objid), update=kw.get('update', False))
+            self.add(self.api.get_object(objid), update=update)

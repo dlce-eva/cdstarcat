@@ -3,7 +3,7 @@ Deletes objects with no bitstreams from CDSTAR and the catalog.
 """
 
 
-def register(parser):
+def register(parser):  # pylint: disable=C0116
     parser.add_argument(
         '--dry-run',
         action='store_true',
@@ -12,20 +12,20 @@ def register(parser):
     )
 
 
-def run(args):
+def run(args):  # pylint: disable=C0116
     n, d, r = len(args.catalog), [], []
     for obj in args.catalog:
         if not obj.bitstreams:
             if obj.is_special:  # pragma: no cover
-                print('removing {0} from catalog'.format(obj.id))
+                print(f'removing {obj.id} from catalog')
                 r.append(obj)
             else:
-                print('deleting {0} from CDSTAR'.format(obj.id))
+                print(f'deleting {obj.id} from CDSTAR')
                 d.append(obj)
     if not args.dry_run:
         for obj in d:
             args.catalog.delete(obj)
         for obj in r:  # pragma: no cover
             args.catalog.remove(obj)
-    args.log.info('{0} objects deleted'.format(n - len(args.catalog)))
+    args.log.info(f'{n - len(args.catalog)} objects deleted')
     return n - len(args.catalog)

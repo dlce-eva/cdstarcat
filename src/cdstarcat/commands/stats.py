@@ -7,18 +7,18 @@ import collections
 from clldutils.clilib import Table, add_format
 
 
-def register(parser):
+def register(parser):  # pylint: disable=C0116
     add_format(parser, default='simple')
 
 
-def run(args):
+def run(args):  # pylint: disable=C0116
+    nbitstreams = sum(len(obj.bitstreams) for obj in args.catalog)
     print('Summary:')
-    print('  {0:,} objects with {1:,} bitstreams of total size {2}'.format(
-        len(args.catalog), sum(len(obj.bitstreams) for obj in args.catalog), args.catalog.size_h))
-    print('  {0} duplicate bitstreams'.format(
-        sum(1 for objs in args.catalog.md5_to_object.values() if len(objs) > 1)))
-    print('  {0} objects with no bitstreams'.format(
-        sum(1 for obj in args.catalog if not obj.bitstreams)))
+    print(f'  {len(args.catalog):,} objects with {nbitstreams:,} '
+          f'bitstreams of total size {args.catalog.size_h}')
+    duplicates = sum(1 for objs in args.catalog.md5_to_object.values() if len(objs) > 1)
+    print(f'  {duplicates} duplicate bitstreams')
+    print(f'  {sum(1 for obj in args.catalog if not obj.bitstreams)} objects with no bitstreams')
 
     print()
     types = collections.Counter(itertools.chain(
