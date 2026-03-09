@@ -9,9 +9,19 @@ Clone clld/cdstarcat and switch to the master branch. Then:
 tox -r
 ```
 
+- Do integration test running:
+```shell
+python test_integration.py
+```
+
 - Make sure flake8 passes::
 ```shell script
 flake8 src/
+```
+
+- Make sure pylint passes with a score of 10:
+```shell
+pylint src/
 ```
 
 - Change version to the new version number in

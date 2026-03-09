@@ -1,10 +1,14 @@
+"""
+Helpers for cli commands.
+"""
 import os
 import argparse
 
 from cdstarcat.catalog import OBJID_PATTERN
 
 
-def objid(string):
+def objid(string: str) -> str:
+    """An OBJID type to parse cli options."""
     if not OBJID_PATTERN.match(string):
         raise argparse.ArgumentTypeError(f'No valid OBJID: {string}!')
     return string

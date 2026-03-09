@@ -1,3 +1,6 @@
+"""
+Support for specialized CDSTAR objects.
+"""
 import datetime
 import dataclasses
 from typing import Optional, Union
@@ -28,7 +31,8 @@ class RollingBlob:
             raise ValueError('If oid is given, neither collection nor name must be given.')
 
     @staticmethod
-    def parse_timestamp(bsid: str):
+    def parse_timestamp(bsid: str) -> datetime.datetime:
+        """Turn the timestamp used to order blobs into a datetime object."""
         try:
             return datetime.datetime.strptime(bsid.split('_')[-1].split('.')[0], TIMESTAMP_FORMAT)
         except (ValueError, TypeError):
@@ -51,7 +55,7 @@ class RollingBlob:
             self.collection = md['collection']
         return obj
 
-    def add(self,
+    def add(self,  # pylint: disable=R0913,R0917
             cdstar: Cdstar,
             fname: str,
             suffix: str = '',
@@ -81,6 +85,7 @@ class RollingBlob:
         res = self.sorted_bitstreams(cdstar)
         if res:
             return res[0]
+        return None  # pragma: no cover
 
     def expunge(self, cdstar: Cdstar, keep: int = 5) -> int:
         """Delete older bitstreams until only `keep` are left."""

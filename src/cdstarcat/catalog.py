@@ -1,3 +1,6 @@
+"""
+A local Catalog listing objects from a CDSTAR instance.
+"""
 import re
 import time
 import json
@@ -9,16 +12,8 @@ import collections
 import dataclasses
 from typing import Any, Union, Optional
 
-import requests
-try:
-    from requests.packages.urllib3.exceptions import InsecureRequestWarning, InsecurePlatformWarning
-    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-    requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
-except ImportError:  # pragma: no cover
-    pass
-
 from pycdstar import media
-from pycdstar.resource import Resource
+from pycdstar.resource import Object as CdstarObject
 from pycdstar.catalog import filter_hidden, iter_files
 from pycdstar.api import Cdstar
 from clldutils.jsonlib import dump, load
@@ -32,14 +27,15 @@ mimetypes.add_type('video/mp4', '.mod', strict=False)
 OBJID_PATTERN = re.compile('-'.join(['[A-F0-9]{%s}' % n for n in [5, 4, 4, 4, 1]]) + '$')
 
 
-class WithHumanReadableSize:
+class WithHumanReadableSize:  # pylint: disable=R0903,C0115
     @property
-    def size_h(self):
+    def size_h(self):  # pylint: disable=C0116
         return format_size(getattr(self, 'size', 0))
 
 
 @dataclasses.dataclass(frozen=True)
 class Bitstream(WithHumanReadableSize):
+    """Bitstream metadata representation in the Catalog."""
     id: str
     size: int
     mimetype: str
@@ -48,15 +44,15 @@ class Bitstream(WithHumanReadableSize):
     modified: float
 
     @property
-    def created_datetime(self):
+    def created_datetime(self) -> datetime.datetime:  # pylint: disable=C0116
         return datetime.datetime.fromtimestamp(self.created / 1e3)
 
     @property
-    def modified_datetime(self):
+    def modified_datetime(self) -> datetime.datetime:  # pylint: disable=C0116
         return datetime.datetime.fromtimestamp(self.modified / 1e3)
 
     @classmethod
-    def fromdict(cls, d):
+    def fromdict(cls, d):  # pylint: disable=C0116
         return cls(
             d['bitstreamid'],
             d['filesize'],
@@ -65,7 +61,7 @@ class Bitstream(WithHumanReadableSize):
             d['created'],
             d['last-modified'])
 
-    def asdict(self):
+    def asdict(self):  # pylint: disable=C0116
         return collections.OrderedDict([
             ("bitstreamid", self.id),
             ("checksum", self.md5),
@@ -79,27 +75,28 @@ class Bitstream(WithHumanReadableSize):
 
 @dataclasses.dataclass(frozen=True)
 class Object(WithHumanReadableSize):
+    """The representation of a CDSTAR object in the catalog."""
     id: str
     bitstreams: list[Bitstream]
     metadata: dict[str, Any]
 
     @property
     def size(self):
+        """The size of an object is the sum of the sizes of its bitstreams."""
         return sum(bs.size for bs in self.bitstreams)
 
     @property
-    def is_special(self):
+    def is_special(self):  # pylint: disable=C0116
         return 'warning' in self.metadata
 
     @classmethod
-    def fromdict(cls, id_, d):
+    def fromdict(cls, id_, d):  # pylint: disable=C0116
         return cls(id_, [Bitstream.fromdict(bs) for bs in d['bitstreams']], d['metadata'])
 
-    def asdict(self):
+    def asdict(self) -> collections.OrderedDict[str, Any]:  # pylint: disable=C0116
         return collections.OrderedDict([
             ('bitstreams', [bs.asdict() for bs in self.bitstreams]),
-            ('metadata', collections.OrderedDict(
-                [(k, v) for k, v in sorted(self.metadata.items())]))]
+            ('metadata', collections.OrderedDict(sorted(self.metadata.items())))]
         )
 
 
@@ -110,12 +107,13 @@ class Catalog(WithHumanReadableSize):
     For operations resulting in changes the Catalog should be used as context manager to
     make sure changes are written to disk.
     """
-    def __init__(
+    def __init__(  # pylint: disable=R0913,R0917
             self,
             path: Union[str, pathlib.Path],
             cdstar_url: Optional[str] = None,
             cdstar_user: Optional[str] = None,
             cdstar_pwd: Optional[str] = None,
+            debug: bool = False,
     ):
         self.path: pathlib.Path = pathlib.Path(path)
         self.objects: dict[str, Object] = {}
@@ -129,7 +127,8 @@ class Catalog(WithHumanReadableSize):
                         break
             else:
                 self.objects = {i: Object.fromdict(i, d) for i, d in load(self.path).items()}
-        self.api: Cdstar = Cdstar(service_url=cdstar_url, user=cdstar_user, password=cdstar_pwd)
+        self.api: Cdstar = Cdstar(
+            service_url=cdstar_url, user=cdstar_user, password=cdstar_pwd, debug=debug)
 
     @property
     def md5_to_object(self) -> dict[str, list[Object]]:
@@ -188,9 +187,9 @@ class Catalog(WithHumanReadableSize):
     def __setitem__(self, item, obj):
         objid = getattr(item, 'id', item)
         if not OBJID_PATTERN.match(objid):
-            raise ValueError('invalid object ID: %s' % objid)
+            raise ValueError(f'invalid object ID: {objid}')
         if not isinstance(obj, Object):
-            raise ValueError('invalid object type: %s' % type(obj))
+            raise ValueError(f'invalid object type: {type(obj)}')
         self.objects[objid] = obj
 
     @property
@@ -198,7 +197,12 @@ class Catalog(WithHumanReadableSize):
         """The total size of objects in the catalog."""
         return sum(obj.size for obj in self)
 
-    def add(self, obj: Resource, metadata: Optional[dict] = None, update: bool = False):
+    def add(
+            self,
+            obj: CdstarObject,
+            metadata: Optional[dict] = None,
+            update: bool = False,
+    ) -> Optional[Object]:
         """
         Add an existing CDSTAR object to the catalog.
 
@@ -207,20 +211,23 @@ class Catalog(WithHumanReadableSize):
         if (obj not in self) or update:
             self[obj.id] = Object.fromdict(
                 obj.id,
-                dict(
+                dict(  # pylint: disable=R1735
                     metadata=obj.metadata.read() if metadata is None else metadata,
-                    bitstreams=[bs._properties for bs in obj.bitstreams]))
+                    bitstreams=[bs._properties for bs in obj.bitstreams]))  # pylint: disable=W0212
             time.sleep(0.1)
             return self.objects[obj.id]
+        return None
 
     def add_rollingblob(self, fname, oid=None, collection=None, name=None, **kw):
+        """Add a blob to a "rolling blob" object in the catalog."""
         rb = RollingBlob(oid=oid, collection=collection, name=name)
         keep = kw.pop('keep', 5)
         rb.add(self.api, fname, **kw)
         rb.expunge(self.api, keep=keep)
         return self.add(rb.get_object(self.api), update=True)
 
-    def remove(self, obj):
+    def remove(self, obj: Union[str, Object]):
+        """Remove an object from the catalog."""
         del self.objects[getattr(obj, 'id', obj)]
 
     def delete(self, obj):
@@ -259,11 +266,11 @@ class Catalog(WithHumanReadableSize):
     def _create(self, path, metadata, object_class=None):
         mimetype = mimetypes.guess_type(str(path), strict=False)[0] \
             or 'application/octet-stream'
-        maintype, subtype = mimetype.split('/')
+        maintype, _ = mimetype.split('/')
         cls = object_class or getattr(media, maintype.capitalize(), media.File)
         file_ = cls(path)
         if file_.md5 not in self.md5_to_object:
-            obj, md, bitstreams = file_.create_object(self.api, metadata)
+            obj, md, _ = file_.create_object(self.api, metadata)
             return True, self.add(obj, metadata=md)
         return False, self.md5_to_object[file_.md5][0]
 
