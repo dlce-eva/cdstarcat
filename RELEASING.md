@@ -27,6 +27,7 @@ pylint src/
 - Change version to the new version number in
   - setup.cfg
   - src/cdstarcat/__init__.py
+  - CHANGELOG.md
 
 - Commit your change of the version number:
 ```shell script
