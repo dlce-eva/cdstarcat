@@ -6,6 +6,8 @@ import zipfile
 import datetime
 import mimetypes
 import collections
+import dataclasses
+from typing import Any, Union, Optional
 
 import requests
 try:
@@ -14,9 +16,9 @@ try:
     requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
 except ImportError:  # pragma: no cover
     pass
-import attr
 
 from pycdstar import media
+from pycdstar.resource import Resource
 from pycdstar.catalog import filter_hidden, iter_files
 from pycdstar.api import Cdstar
 from clldutils.jsonlib import dump, load
@@ -30,20 +32,20 @@ mimetypes.add_type('video/mp4', '.mod', strict=False)
 OBJID_PATTERN = re.compile('-'.join(['[A-F0-9]{%s}' % n for n in [5, 4, 4, 4, 1]]) + '$')
 
 
-class WithHumanReadableSize(object):
+class WithHumanReadableSize:
     @property
     def size_h(self):
         return format_size(getattr(self, 'size', 0))
 
 
-@attr.s(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class Bitstream(WithHumanReadableSize):
-    id = attr.ib()
-    size = attr.ib()
-    mimetype = attr.ib()
-    md5 = attr.ib()
-    created = attr.ib()
-    modified = attr.ib()
+    id: str
+    size: int
+    mimetype: str
+    md5: str
+    created: float
+    modified: float
 
     @property
     def created_datetime(self):
@@ -75,11 +77,11 @@ class Bitstream(WithHumanReadableSize):
         ])
 
 
-@attr.s(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class Object(WithHumanReadableSize):
-    id = attr.ib()
-    bitstreams = attr.ib()
-    metadata = attr.ib()
+    id: str
+    bitstreams: list[Bitstream]
+    metadata: dict[str, Any]
 
     @property
     def size(self):
@@ -108,9 +110,15 @@ class Catalog(WithHumanReadableSize):
     For operations resulting in changes the Catalog should be used as context manager to
     make sure changes are written to disk.
     """
-    def __init__(self, path, cdstar_url=None, cdstar_user=None, cdstar_pwd=None):
-        self.path = pathlib.Path(path)
-        self.objects = {}
+    def __init__(
+            self,
+            path: Union[str, pathlib.Path],
+            cdstar_url: Optional[str] = None,
+            cdstar_user: Optional[str] = None,
+            cdstar_pwd: Optional[str] = None,
+    ):
+        self.path: pathlib.Path = pathlib.Path(path)
+        self.objects: dict[str, Object] = {}
         if self.path.exists():
             if self.path.suffix.lower() == '.zip':
                 with zipfile.ZipFile(str(self.path), 'r') as z:
@@ -121,10 +129,11 @@ class Catalog(WithHumanReadableSize):
                         break
             else:
                 self.objects = {i: Object.fromdict(i, d) for i, d in load(self.path).items()}
-        self.api = Cdstar(service_url=cdstar_url, user=cdstar_user, password=cdstar_pwd)
+        self.api: Cdstar = Cdstar(service_url=cdstar_url, user=cdstar_user, password=cdstar_pwd)
 
     @property
-    def md5_to_object(self):
+    def md5_to_object(self) -> dict[str, list[Object]]:
+        """Maps md5 sums of bitstreams to the containing objects."""
         res = collections.defaultdict(list)
         for obj in self.objects.values():
             for bs in obj.bitstreams:
@@ -135,6 +144,7 @@ class Catalog(WithHumanReadableSize):
         return self
 
     def __exit__(self, *args):
+        """Write the catalog to disk on exit."""
         ordered = collections.OrderedDict(
             [(k, v.asdict()) for k, v in sorted(self.objects.items())])
         if self.path.suffix.lower() == '.zip':
@@ -163,7 +173,10 @@ class Catalog(WithHumanReadableSize):
         item = getattr(item, 'id', item)
         return (item in self.objects) or (item in self.md5_to_object)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: Union[Object, str]) -> Union[Object, list[Object]]:
+        """
+        An item is in the catalog, if its id attribute is or if item is a md5sum in the catalog.
+        """
         item = getattr(item, 'id', item)
         if item in self.objects:
             return self.objects[item]
@@ -181,10 +194,11 @@ class Catalog(WithHumanReadableSize):
         self.objects[objid] = obj
 
     @property
-    def size(self):
+    def size(self) -> int:
+        """The total size of objects in the catalog."""
         return sum(obj.size for obj in self)
 
-    def add(self, obj, metadata=None, update=False):
+    def add(self, obj: Resource, metadata: Optional[dict] = None, update: bool = False):
         """
         Add an existing CDSTAR object to the catalog.
 

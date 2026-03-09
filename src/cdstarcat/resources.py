@@ -1,5 +1,7 @@
 import datetime
 
+from ._compat import utcnow
+
 # We use a timestamp format which is compatible with the syntax of CDSTAR bitstream names:
 TIMESTAMP_FORMAT = '%Y%m%dT%H%M%SZ'
 
@@ -46,7 +48,7 @@ class RollingBlob(object):
     def add(self, cdstar, fname, suffix='', timestamp=None, mimetype=None):
         if '_' in suffix:
             raise ValueError(suffix)
-        timestamp = timestamp or datetime.datetime.utcnow()
+        timestamp = timestamp or utcnow()
         if isinstance(timestamp, str):
             timestamp = datetime.datetime.strptime(timestamp, TIMESTAMP_FORMAT)
         if suffix and not suffix.startswith('.'):

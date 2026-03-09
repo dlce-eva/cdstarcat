@@ -23,7 +23,7 @@ def run(args):
     print()
     types = collections.Counter(itertools.chain(
         *[[bs.mimetype for bs in obj.bitstreams] for obj in args.catalog]))
-    with Table('maintype', 'subtype', 'bitstreams') as table:
+    with Table(args, 'maintype', 'subtype', 'bitstreams') as table:
         for maintype, items in itertools.groupby(
                 sorted(types.items(), key=lambda p: (p[0].split('/')[0], -p[1])),
                 lambda p: p[0].split('/')[0]):
