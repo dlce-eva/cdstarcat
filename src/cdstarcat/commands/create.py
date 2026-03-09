@@ -4,7 +4,7 @@ Create objects in CDSTAR (and record them in the catalog).
 from clldutils.clilib import PathType
 
 
-def register(parser):
+def register(parser):  # pylint: disable=C0116
     parser.add_argument(
         'path',
         type=PathType(),
@@ -15,7 +15,6 @@ def register(parser):
         metavar='PATH')
 
 
-def run(args):
+def run(args):  # pylint: disable=C0116
     for fname, created, obj in args.catalog.create(args.path, {}):
-        args.log.info('{0} -> {1} object {2.id}'.format(
-            fname, 'new' if created else 'existing', obj))
+        args.log.info(f"{fname} -> {'new' if created else 'existing'} object {obj.id}")

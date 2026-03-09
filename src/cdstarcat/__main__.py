@@ -13,12 +13,12 @@ from cdstarcat.cli_util import add_cdstar
 import cdstarcat.commands
 
 
-def main(args=None, catch_all=False, parsed_args=None, log=None):
+def main(args=None, catch_all=False, parsed_args=None, log=None):  # pylint: disable=C0116
     parser, subparsers = get_parser_and_subparsers('cdstarcat')
     envvar = 'CDSTAR_CATALOG'
     parser.add_argument(
         '--catalog',
-        help="defaults to ${0}".format(envvar),
+        help=f"defaults to ${envvar}",
         default=os.environ.get(envvar))
     add_cdstar(parser)
     register_subcommands(subparsers, cdstarcat.commands)
